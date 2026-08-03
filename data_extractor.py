@@ -11,7 +11,7 @@ d = requests.get(url).json()
 df = pd.DataFrame(d['elements'])
 teams = pd.DataFrame(d['teams'])
 data = df[['id','web_name', 'element_type', 'form', 'now_cost', 'points_per_game','team']].copy()
-data = data.astype({'form':'float'})
+data = data.astype({'form':'float', 'points_per_game':'float'})
 data['now_cost'] /= 10
 
 next_gw = next(e['id'] for e in d['events'] if e['is_next'])
