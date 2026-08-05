@@ -31,6 +31,6 @@ fdr_d1 = dict(zip(fdr_summary['team'],fdr_summary['fdr_avg']))
 fdr_d2 = dict(zip(fdr_summary['team'],fdr_summary['fixture_count']))
 
 data['fdr_avg'] = data['team'].map(fdr_d1)
-data['fixture count'] = data['team'].map(fdr_d2)
+data['fixture_count'] = data['team'].map(fdr_d2)
 
 data.to_csv('player_data.csv',index= False)
