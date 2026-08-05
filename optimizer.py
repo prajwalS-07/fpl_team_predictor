@@ -1,5 +1,13 @@
 import pandas as pd
 import pulp
+import requests
+import sys
+
+sys.stdout.reconfigure(encoding='utf-8')
+pd.set_option('display.precision',3)
+
+url = 'https://fantasy.premierleague.com/api/bootstrap-static/'
+d = requests.get(url).json()
 
 data = pd.read_csv(r'player_data.csv')
 
@@ -47,5 +55,17 @@ for team_id in data['team'].unique():
 problem.solve(pulp.PULP_CBC_CMD(msg=False))
 
 selected_indices = [i for i in data.index if player_vars[i].varValue == 1]
-squad = data.loc[selected_indices].copy()
+optimized_players = data.loc[selected_indices].copy()
+
+team_map = {team['id']: team['name'] for team in d['teams']}
+
+pos_map = {
+    pos['id']: pos['singular_name_short'] for pos in d['element_types']
+}
+
+squad = optimized_players[['web_name','element_type','team','now_cost','score']].copy()
+squad = squad.sort_values('score', ascending=False)
+
+squad['team'] = squad['team'].map(team_map)
+squad['element_type'] = squad['element_type'].map(pos_map)
 
