@@ -64,8 +64,9 @@ pos_map = {
 }
 
 squad = optimized_players[['web_name','element_type','team','now_cost','score']].copy()
-squad = squad.sort_values('score', ascending=False)
+squad = squad.sort_values(['element_type', 'score'], ascending=[True, False])
 
 squad['team'] = squad['team'].map(team_map)
 squad['element_type'] = squad['element_type'].map(pos_map)
 
+print(squad)
