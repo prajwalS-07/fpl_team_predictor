@@ -1,5 +1,6 @@
 # Data files (regenerated every GW)
 *.csv
+!predicted_squads.csv
 
 # Python
 __pycache__/
