@@ -76,6 +76,10 @@ log_path = 'predicted_squads.csv'
 next_gw = next(e['id'] for e in d['events'] if e['is_next'])
 
 squad_to_log = optimized_players[['id', 'web_name', 'element_type', 'team', 'now_cost', 'score']].copy()
+squad_to_log = squad_to_log.sort_values(['element_type', 'score'], ascending=[True, False])
+
+squad_to_log['team'] = squad_to_log['team'].map(team_map)
+squad_to_log['element_type'] = squad_to_log['element_type'].map(pos_map)
 squad_to_log.insert(0, 'gw', next_gw)
 squad_to_log['points_scored'] = pd.NA 
 
