@@ -2,6 +2,7 @@ import pandas as pd
 import pulp
 import requests
 import sys
+import os
 
 sys.stdout.reconfigure(encoding='utf-8')
 pd.set_option('display.precision',3)
@@ -70,3 +71,13 @@ squad['team'] = squad['team'].map(team_map)
 squad['element_type'] = squad['element_type'].map(pos_map)
 
 print(squad)
+
+log_path = 'predicted_squads.csv'
+next_gw = next(e['id'] for e in d['events'] if e['is_next'])
+
+squad_to_log = optimized_players[['id', 'web_name', 'element_type', 'team', 'now_cost', 'score']].copy()
+squad_to_log.insert(0, 'gw', next_gw)
+squad_to_log['points_scored'] = pd.NA 
+
+write_header = not os.path.exists(log_path)
+squad_to_log.to_csv(log_path, mode='a', header=write_header, index=False, encoding='utf-8')
