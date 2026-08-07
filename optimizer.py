@@ -72,7 +72,7 @@ squad['element_type'] = squad['element_type'].map(pos_map)
 
 print(squad)
 
-log_path = 'predicted_squads.csv'
+log_path = 'predicted_squads_2026-27.csv'
 next_gw = next(e['id'] for e in d['events'] if e['is_next'])
 
 squad_to_log = optimized_players[['id', 'web_name', 'element_type', 'team', 'now_cost', 'score']].copy()
