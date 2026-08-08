@@ -14,7 +14,8 @@ data = pd.read_csv(r'player_data.csv')
 
 cost_safe = data['now_cost'].replace(0, pd.NA)
 fdr_term = (1/data['fdr_avg'])**(data['fixture_count']/2)
-data['score'] = ((data['form']/cost_safe)*fdr_term + data['points_per_game']**(1/3)).fillna(0)
+score = ((data['form']/cost_safe)*fdr_term + data['points_per_game']**(1/3))
+data['score'] = score.where(data['fixture_count'] > 0, 0).fillna(0)
 
 #initializieng problem
 problem = pulp.LpProblem('Squad_Optimizer', pulp.LpMaximize)
