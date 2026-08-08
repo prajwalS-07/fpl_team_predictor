@@ -39,5 +39,9 @@ selected_indices = [i for i in data.index if player_vars[i].varValue == 1]
 playing_11 = data.loc[selected_indices].copy()
 
 print(playing_11.to_string())
-max_points = playing_11['points_scored'].sum()
-print(f"Max points scored = {max_points}")
+captain_row = playing_11.loc[playing_11['score'].idxmax()]
+captain_points = captain_row['points_scored']
+
+max_points = playing_11['points_scored'].sum() + captain_points
+print(f"Predicted captain: {captain_row['web_name']} ({captain_points} pts, doubled)")
+print(f"Total points (with captain bonus) = {max_points}")
