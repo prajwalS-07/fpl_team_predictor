@@ -4,85 +4,91 @@ import requests
 import sys
 import os
 
-sys.stdout.reconfigure(encoding='utf-8')
-pd.set_option('display.precision',3)
+def optimizer():
 
-url = 'https://fantasy.premierleague.com/api/bootstrap-static/'
-d = requests.get(url).json()
+    sys.stdout.reconfigure(encoding='utf-8')
+    pd.set_option('display.precision',3)
 
-data = pd.read_csv(r'player_data.csv')
+    url = 'https://fantasy.premierleague.com/api/bootstrap-static/'
+    d = requests.get(url).json()
 
-cost_safe = data['now_cost'].replace(0, pd.NA)
-fdr_term = (1/data['fdr_avg'])**(data['fixture_count']/2)
-score = ((data['form']/cost_safe)*fdr_term + data['points_per_game']**(1/3))
-data['score'] = score.where(data['fixture_count'] > 0, 0).fillna(0)
+    data = pd.read_csv(r'player_data.csv')
 
-#initializieng problem
-problem = pulp.LpProblem('Squad_Optimizer', pulp.LpMaximize)
-player_vars = pulp.LpVariable.dicts("Select", data.index, cat='Binary')
+    cost_safe = data['now_cost'].replace(0, pd.NA)
+    fdr_term = (1/data['fdr_avg'])**(data['fixture_count']/2)
+    score = ((data['form']/cost_safe)*fdr_term + data['points_per_game']**(1/3))
+    data['score'] = score.where(data['fixture_count'] > 0, 0).fillna(0)
 
-#def problem
-problem += pulp.lpSum([data.loc[i, 'score'] * player_vars[i] for i in data.index])
+    #initializieng problem
+    problem = pulp.LpProblem('Squad_Optimizer', pulp.LpMaximize)
+    player_vars = pulp.LpVariable.dicts("Select", data.index, cat='Binary')
 
-#15 player squad
-problem += pulp.lpSum([player_vars[i] for i in data.index]) == 15
+    #def problem
+    problem += pulp.lpSum([data.loc[i, 'score'] * player_vars[i] for i in data.index])
 
-#total cost cant exceed 100
-problem += pulp.lpSum([data.loc[i, 'now_cost']*player_vars[i] for i in data.index]) <= 100
+    #15 player squad
+    problem += pulp.lpSum([player_vars[i] for i in data.index]) == 15
 
-#positional constraints:
+    #total cost cant exceed 100
+    problem += pulp.lpSum([data.loc[i, 'now_cost']*player_vars[i] for i in data.index]) <= 100
 
-#  2 goalkeepers:
-problem += pulp.lpSum([player_vars[i] for i in data.index if data.loc[i, 'element_type'] == 1]) == 2
+    #positional constraints:
 
-#   5 defenders:
-problem += pulp.lpSum([player_vars[i] for i in data.index if data.loc[i, 'element_type'] == 2]) == 5
+    #  2 goalkeepers:
+    problem += pulp.lpSum([player_vars[i] for i in data.index if data.loc[i, 'element_type'] == 1]) == 2
 
-#   5 midfielders:
-problem += pulp.lpSum([player_vars[i] for i in data.index if data.loc[i, 'element_type'] == 3]) == 5
+    #   5 defenders:
+    problem += pulp.lpSum([player_vars[i] for i in data.index if data.loc[i, 'element_type'] == 2]) == 5
 
-#   3 forwards:
-problem += pulp.lpSum([player_vars[i] for i in data.index if data.loc[i, 'element_type'] == 4]) == 3
+    #   5 midfielders:
+    problem += pulp.lpSum([player_vars[i] for i in data.index if data.loc[i, 'element_type'] == 3]) == 5
+
+    #   3 forwards:
+    problem += pulp.lpSum([player_vars[i] for i in data.index if data.loc[i, 'element_type'] == 4]) == 3
 
 
-#   3 players per team
-for team_id in data['team'].unique():
-  problem += (
-      pulp.lpSum([
-          player_vars[i] for i in data.index if data.loc[i, 'team'] == team_id
-      ])
-      <= 3
-  )
+    #   3 players per team
+    for team_id in data['team'].unique():
+        problem += (
+        pulp.lpSum([
+            player_vars[i] for i in data.index if data.loc[i, 'team'] == team_id
+        ])
+        <= 3
+    )
 
-problem.solve(pulp.PULP_CBC_CMD(msg=False))
+    problem.solve(pulp.PULP_CBC_CMD(msg=False))
 
-selected_indices = [i for i in data.index if player_vars[i].varValue == 1]
-optimized_players = data.loc[selected_indices].copy()
+    selected_indices = [i for i in data.index if player_vars[i].varValue == 1]
+    optimized_players = data.loc[selected_indices].copy()
 
-team_map = {team['id']: team['name'] for team in d['teams']}
+    team_map = {team['id']: team['name'] for team in d['teams']}
 
-pos_map = {
-    pos['id']: pos['singular_name_short'] for pos in d['element_types']
-}
+    pos_map = {
+        pos['id']: pos['singular_name_short'] for pos in d['element_types']
+    }
 
-squad = optimized_players[['web_name','element_type','team','now_cost','score']].copy()
-squad = squad.sort_values(['element_type', 'score'], ascending=[True, False])
+    squad = optimized_players[['web_name','element_type','team','now_cost','score']].copy()
+    squad = squad.sort_values(['element_type', 'score'], ascending=[True, False])
 
-squad['team'] = squad['team'].map(team_map)
-squad['element_type'] = squad['element_type'].map(pos_map)
+    squad['team'] = squad['team'].map(team_map)
+    squad['element_type'] = squad['element_type'].map(pos_map)
 
-print(squad)
+    print(squad)
 
-log_path = 'predicted_squads_2026-27.csv'
-next_gw = next(e['id'] for e in d['events'] if e['is_next'])
+    log_path = 'predicted_squads_2026-27.csv'
+    next_gw = next(e['id'] for e in d['events'] if e['is_next'])
 
-squad_to_log = optimized_players[['id', 'web_name', 'element_type', 'team', 'now_cost', 'score']].copy()
-squad_to_log = squad_to_log.sort_values(['element_type', 'score'], ascending=[True, False])
+    squad_to_log = optimized_players[['id', 'web_name', 'element_type', 'team', 'now_cost', 'score']].copy()
+    squad_to_log = squad_to_log.sort_values(['element_type', 'score'], ascending=[True, False])
 
-squad_to_log['team'] = squad_to_log['team'].map(team_map)
-squad_to_log['element_type'] = squad_to_log['element_type'].map(pos_map)
-squad_to_log.insert(0, 'gw', next_gw)
-squad_to_log['points_scored'] = pd.NA 
+    squad_to_log['team'] = squad_to_log['team'].map(team_map)
+    squad_to_log['element_type'] = squad_to_log['element_type'].map(pos_map)
+    squad_to_log.insert(0, 'gw', next_gw)
+    squad_to_log['points_scored'] = pd.NA 
 
-write_header = not os.path.exists(log_path)
-squad_to_log.to_csv(log_path, mode='a', header=write_header, index=False, encoding='utf-8')
+    write_header = not os.path.exists(log_path)
+    squad_to_log.to_csv(log_path, mode='a', header=write_header, index=False, encoding='utf-8')
+
+
+if __name__ == '__main__':
+    optimizer()
