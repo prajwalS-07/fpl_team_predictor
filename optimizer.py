@@ -31,6 +31,14 @@ def optimizer():
     score = ((data['form']/cost_safe)*fdr_term + data['points_per_game']**(1/3))
     data['score'] = score.where(data['fixture_count'] > 0, 0).fillna(0)
 
+    max_budget = 100.0
+    max_players = 15
+    max_players_per_team = 3
+    gks = 2
+    defenders = 5
+    midfielders = 5
+    forwards = 3
+
     #initializieng problem
     problem = pulp.LpProblem('Squad_Optimizer', pulp.LpMaximize)
     player_vars = pulp.LpVariable.dicts("Select", data.index, cat='Binary')
@@ -39,24 +47,24 @@ def optimizer():
     problem += pulp.lpSum([data.loc[i, 'score'] * player_vars[i] for i in data.index])
 
     #15 player squad
-    problem += pulp.lpSum([player_vars[i] for i in data.index]) == 15
+    problem += pulp.lpSum([player_vars[i] for i in data.index]) == max_players
 
     #total cost cant exceed 100
-    problem += pulp.lpSum([data.loc[i, 'now_cost']*player_vars[i] for i in data.index]) <= 100
+    problem += pulp.lpSum([data.loc[i, 'now_cost']*player_vars[i] for i in data.index]) <= max_budget
 
     #positional constraints:
 
     #  2 goalkeepers:
-    problem += pulp.lpSum([player_vars[i] for i in data.index if data.loc[i, 'element_type'] == 1]) == 2
+    problem += pulp.lpSum([player_vars[i] for i in data.index if data.loc[i, 'element_type'] == 1]) == gks
 
     #   5 defenders:
-    problem += pulp.lpSum([player_vars[i] for i in data.index if data.loc[i, 'element_type'] == 2]) == 5
+    problem += pulp.lpSum([player_vars[i] for i in data.index if data.loc[i, 'element_type'] == 2]) == defenders
 
     #   5 midfielders:
-    problem += pulp.lpSum([player_vars[i] for i in data.index if data.loc[i, 'element_type'] == 3]) == 5
+    problem += pulp.lpSum([player_vars[i] for i in data.index if data.loc[i, 'element_type'] == 3]) == midfielders
 
     #   3 forwards:
-    problem += pulp.lpSum([player_vars[i] for i in data.index if data.loc[i, 'element_type'] == 4]) == 3
+    problem += pulp.lpSum([player_vars[i] for i in data.index if data.loc[i, 'element_type'] == 4]) == forwards
 
 
     #   3 players per team
