@@ -7,7 +7,19 @@ def extractor():
     pd.set_option('display.precision',3)
 
     url = 'https://fantasy.premierleague.com/api/bootstrap-static/'
-    d = requests.get(url).json()
+    try:
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        d = response.json()
+    except requests.exceptions.ConnectionError:
+        print("Couldn't reach the FPL API — check your internet connection.")
+        return
+    except requests.exceptions.Timeout:
+        print("Request to the FPL API timed out. Try again.")
+        return
+    except requests.exceptions.HTTPError as e:
+        print(f"FPL API returned an error: {e}")
+        return
 
     df = pd.DataFrame(d['elements'])
     teams = pd.DataFrame(d['teams'])
