@@ -73,7 +73,7 @@ def optimizer():
         pulp.lpSum([
             player_vars[i] for i in data.index if data.loc[i, 'team'] == team_id
         ])
-        <= 3
+        <= max_players_per_team
     )
 
     problem.solve(pulp.PULP_CBC_CMD(msg=False))
