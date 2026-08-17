@@ -25,10 +25,13 @@ def optimizer():
         return
 
     data = pd.read_csv(r'player_data.csv')
+    data = data[data['status'].isin(['a', 'd'])].reset_index(drop=True)
 
     cost_safe = data['now_cost'].replace(0, pd.NA)
-    fdr_term = (1/data['fdr_avg'])**(data['fixture_count']/2)
-    score = ((data['form']/cost_safe)*fdr_term + data['points_per_game']**(1/3))
+    fdr_term = (1 / data['fdr_avg']) ** (data['fixture_count'] / 2)
+    availability_weight = data['chance_of_playing_next_round'] / 100
+
+    score = ((data['form'] / cost_safe) * fdr_term + data['points_per_game'] ** (1/3)) * availability_weight
     data['score'] = score.where(data['fixture_count'] > 0, 0).fillna(0)
 
     max_budget = 100.0
@@ -87,7 +90,7 @@ def optimizer():
         pos['id']: pos['singular_name_short'] for pos in d['element_types']
     }
 
-    squad = optimized_players[['web_name','element_type','team','now_cost','score']].copy()
+    squad = optimized_players[['web_name','element_type','team','now_cost','score','chance_of_playing_next_round']].copy()
     squad = squad.sort_values(['element_type', 'score'], ascending=[True, False])
 
     squad['team'] = squad['team'].map(team_map)
@@ -98,7 +101,7 @@ def optimizer():
     log_path = 'predicted_squads_2026-27.csv'
     next_gw = next(e['id'] for e in d['events'] if e['is_next'])
 
-    squad_to_log = optimized_players[['id', 'web_name', 'element_type', 'team', 'now_cost', 'score']].copy()
+    squad_to_log = optimized_players[['id', 'web_name', 'element_type', 'team', 'now_cost', 'score','chance_of_playing_next_round']].copy()
     squad_to_log = squad_to_log.sort_values(['element_type', 'score'], ascending=[True, False])
 
     squad_to_log['team'] = squad_to_log['team'].map(team_map)
