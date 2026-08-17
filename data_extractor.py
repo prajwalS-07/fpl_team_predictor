@@ -23,9 +23,10 @@ def extractor():
 
     df = pd.DataFrame(d['elements'])
     teams = pd.DataFrame(d['teams'])
-    data = df[['id','web_name', 'element_type', 'form', 'now_cost', 'points_per_game','team']].copy()
+    data = df[['id','web_name', 'element_type', 'form', 'now_cost', 'points_per_game','team','status','chance_of_playing_next_round']].copy()
     data = data.astype({'form':'float', 'points_per_game':'float'})
     data['now_cost'] /= 10
+    data['chance_of_playing_next_round'] = data['chance_of_playing_next_round'].fillna(100)
 
     next_gw = next(e['id'] for e in d['events'] if e['is_next'])
     url2 = f'https://fantasy.premierleague.com/api/fixtures/?event={next_gw}'
