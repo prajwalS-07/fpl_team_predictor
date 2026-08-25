@@ -19,7 +19,7 @@ def best_11():
         print(f"FPL API returned an error: {e}")
         return
 
-    current_gw = next(e['id'] for e in d['events'] if e['is_previous'])
+    current_gw = int(input("Enter the GW that just concluded: "))
 
     log_path = r'predicted_squads_2026-27.csv'
     all_data = pd.read_csv(log_path, encoding='utf-8')
