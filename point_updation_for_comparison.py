@@ -7,7 +7,7 @@ def main():
 
     try:
         gw = int(input("Gameweek: "))
-        totw_points = float(input("TOTW points: "))
+        highest_score_may_include_chips = float(input("Maximum points scored: "))
         my_best11_points = float(input("Your best legal 11 points: "))
         fpl_average = float(input("FPL average points: "))
         p_1_points = float(input("Enter player 1's points: "))
@@ -18,7 +18,7 @@ def main():
     new_row = pd.DataFrame([{
         'gw': gw,
         'my_best11_points': my_best11_points,
-        'totw_points': totw_points,
+        'highest_score_may_include_chips': highest_score_may_include_chips,
         'fpl_average': fpl_average,
         'p_1': p_1_points
     }])
