@@ -29,11 +29,12 @@ def main():
     st.line_chart(chart_data)
 
     st.subheader("Season summary")
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, col3, col4, col5 = st.columns(5)
     col1.metric("Avg predicted best-11", f"{data['my_best11_points'].mean():.1f}")
     col2.metric("Avg actual squad", f"{data['p_1'].mean():.1f}")
     col3.metric("Avg FPL average", f"{data['fpl_average'].mean():.1f}")
-    col4.metric("GWs beating FPL average", f"{(data['p_1'] > data['fpl_average']).sum()} / {len(data)}")
+    col4.metric("GWs predicted squad beat FPL average", f"{(data['my_best11_points'] > data['fpl_average']).sum()} / {len(data)}")
+    col5.metric("GWs my squad beat FPL average", f"{(data['p_1'] > data['fpl_average']).sum()} / {len(data)}")
 
     st.subheader("Raw data")
     st.dataframe(data, use_container_width=True)
