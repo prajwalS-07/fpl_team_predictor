@@ -42,7 +42,7 @@ python optimizer.py                # generates + logs that week's predicted squa
 python manual_point_updation.py    # after the GW finishes, enter real points
 python best_11.py                  # finds your best legal 11 for that GW
 python weekly_comparison.py        # logs the week's results for tracking
-streamlit run dashboard.py         # view the season's performance visually
+streamlit run comparison.py         # view the season's performance visually
 ```
 
 ## Future Scope
