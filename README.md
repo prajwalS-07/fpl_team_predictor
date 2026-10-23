@@ -45,7 +45,7 @@ python weekly_comparison.py        # logs the week's results for tracking
 streamlit run comparison.py         # view the season's performance visually
 ```
 
-To see how the algorithm is faring against real players, check this out: https://fplteampredictor.streamlit.app/
+To see how the algorithm is faring against real FPL results, check this out: [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://fplteampredictor.streamlit.app/)
 
 ## Future Scope
 
