@@ -45,6 +45,8 @@ python weekly_comparison.py        # logs the week's results for tracking
 streamlit run comparison.py         # view the season's performance visually
 ```
 
+To see how the algorithm is faring against real FPL results, check this out: [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://fplteampredictor.streamlit.app/)
+
 ## Future Scope
 
 - A continuous squad tracker that pulls your live FPL squad and suggests a single transfer per gameweek, looking ~5 weeks ahead, plus recommended chip usage.
